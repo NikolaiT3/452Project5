@@ -1,5 +1,7 @@
 # 452Project5
 
+make sure repo is cloned
+
 git checkout develop
 
 git pull
