@@ -31,3 +31,7 @@ git add .
 git commit -m “description of changes”
 
 git push origin develop
+
+to delete a branch
+
+git branch -d feature/yourFeatureName
