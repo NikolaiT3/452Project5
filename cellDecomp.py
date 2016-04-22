@@ -46,8 +46,8 @@ def input_toNumber(text):
   return sanitized_number
 
 inputBlocks = inputFile("./inputs/Blocks/")
-inputEnds = inputFile('./inputs/End/')
-inputStarts = inputFile('./inputs/Start/')
+inputEnds = inputFile('./inputs/End/')[0]
+inputStarts = inputFile('./inputs/Start/')[0]
 
 print inputBlocks
 print inputStarts
