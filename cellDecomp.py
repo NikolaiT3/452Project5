@@ -45,11 +45,11 @@ def input_toNumber(text):
       sanitized_number.append(temp)
   return sanitized_number
 
-inputBlocks = inputFile("./inputs/Blocks/")
-inputEnds = inputFile('./inputs/End/')[0]
-inputStarts = inputFile('./inputs/Start/')[0]
+#inputBlocks = inputFile("./inputs/Blocks/")
+#inputEnds = inputFile('./inputs/End/')[0]
+#inputStarts = inputFile('./inputs/Start/')[0]
 
-print inputBlocks
-print inputStarts
-print inputEnds
+#print inputBlocks
+#print inputStarts
+#print inputEnds
 
