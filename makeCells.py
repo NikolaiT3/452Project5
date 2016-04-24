@@ -8,6 +8,31 @@ import glob
 fieldWidth = 500
 fieldHeight = 500
 
+class App:
+    def __init__(self, master):
+
+        w = Canvas(master, width=500, height=500)
+        w.pack()
+
+        # prevents window from shrinking to fit buttons
+        # w.pack_propagate(0)
+
+        self.quit = Button(
+            w, text="QUIT", fg="red", command=w.quit
+            )
+        self.quit.grid(row=0, column=0)
+        #self.quit.pack(side=BOTTOM)
+
+        self.start = Button(w, text="Start", command=self.run)
+        self.start.grid(row=0, column=1)
+        #self.start.pack(side=TOP)
+
+        # prevents window from shrinking to fit buttons
+        w.grid_propagate(0)
+
+    def run(self):
+        print "Running simulation!"
+
 # ===============================
 # IMPORT FILE FUNCTION
 # ===============================
@@ -155,14 +180,18 @@ def makeBlocks(inputBlocks):
 			currentY = nextY
 	return cells
 
-#inputBlocks = inputFile("./inputs/Blocks/")
-#inputEnds = inputFile('./inputs/End/')[0]
-#inputStarts = inputFile('./inputs/Start/')[0]
+# =======================================
+# Run Point Robot Simulator
+# =======================================
 
-#print inputBlocks
-#print inputStarts
-#print inputEnds
+inputBlocks = inputFile("./inputs/Blocks/")
+print inputBlocks
+print makeBlocks(inputBlocks)
 
-# inputBlocks = cellDecomp.inputFile("./inputs/Blocks/")
-# print inputBlocks
-# print makeBlocks(inputBlocks)
+master = Tk()
+
+app = App(master)
+#w = Canvas(master, width=500, height=500)
+#w.pack()
+
+master.mainloop()
