@@ -6,4 +6,6 @@
 
 # mac
 .DS_Store
+
+# binaries
 makeCells.pyc
