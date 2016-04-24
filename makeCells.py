@@ -1,5 +1,6 @@
 from Tkinter import *
 from math import *
+import graph
 import thread
 import random
 import time
@@ -18,9 +19,7 @@ class App:
         # prevents window from shrinking to fit buttons
         # w.pack_propagate(0)
 
-        self.quit = Button(
-            w, text="QUIT", fg="red", command=w.quit
-            )
+        self.quit = Button(w, text="QUIT", fg="red", command=w.quit)
         self.quit.grid(row=0, column=0)
         #self.quit.pack(side=BOTTOM)
 
