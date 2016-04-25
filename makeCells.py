@@ -23,6 +23,8 @@ class App:
         self.quit.grid(row=0, column=0)
         #self.quit.pack(side=BOTTOM)
 
+        thread.start_new_thread(drawBlocks, (w,1))
+
         self.start = Button(w, text="Start", command=self.run)
         self.start.grid(row=0, column=1)
         #self.start.pack(side=TOP)
@@ -179,6 +181,29 @@ def makeBlocks(inputBlocks):
 			currentX = 0
 			currentY = nextY
 	return cells
+
+def drawBlocks(canvas, n):
+  	x1 = inputBlocks[0][0]
+	y1 = inputBlocks[0][1]
+	x2 = inputBlocks[0][2]
+	y2 = inputBlocks[0][3]
+	rect1 = canvas.create_rectangle(x1, y1, x2+1, y2+1, fill='#fff')
+
+  	x1 = inputBlocks[1][0]
+	y1 = inputBlocks[1][1]
+	x2 = inputBlocks[1][2]
+	y2 = inputBlocks[1][3]
+	rect2 = canvas.create_rectangle(x1, y1, x2+1, y2+1, fill='#fff')
+
+	x1 = inputBlocks[2][0]
+	y1 = inputBlocks[2][1]
+	x2 = inputBlocks[2][2]
+	y2 = inputBlocks[2][3]
+	rect3 = canvas.create_rectangle(x1, y1, x2+1, y2+1, fill='#fff')
+
+
+
+
 
 # =======================================
 # Run Point Robot Simulator
