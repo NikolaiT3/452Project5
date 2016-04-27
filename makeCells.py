@@ -1,4 +1,5 @@
 from Tkinter import *
+#import Tkinter as tk
 from math import *
 import graph
 import thread
@@ -17,20 +18,17 @@ class App:
         w.pack()
 
         # prevents window from shrinking to fit buttons
-        # w.pack_propagate(0)
+        w.grid_propagate(0)
 
         self.quit = Button(w, text="QUIT", fg="red", command=w.quit)
         self.quit.grid(row=0, column=0)
-        #self.quit.pack(side=BOTTOM)
-
-        thread.start_new_thread(drawBlocks, (w,1))
 
         self.start = Button(w, text="Start", command=self.run)
         self.start.grid(row=0, column=1)
-        #self.start.pack(side=TOP)
+        
+        thread.start_new_thread(drawBlocks, (w,1))
 
-        # prevents window from shrinking to fit buttons
-        w.grid_propagate(0)
+        thread.start_new_thread(drawPoints, (w, 1))
 
     def run(self):
         print "Running simulation!"
@@ -54,13 +52,13 @@ def sanitize_input(text):
   sanitized_text = []
   for word in text:
 
-#       Get rid of punctuation, convert to lower, remove new line characters
-#       text = text.translate(None, string.punctuation).lower()
+		# Get rid of punctuation, convert to lower, remove new line characters
+		# text = text.translate(None, string.punctuation).lower()
 
       sanitize = re.sub("[^\w']|_", " ", word.lower())
       words = list(sanitize.split())
 
-#       List of lists to keep books structure
+		# List of lists to keep books structure
       sanitized_text.append(words)
       sanitized_text = input_toNumber(sanitized_text)
   return sanitized_text
@@ -78,7 +76,6 @@ def input_toNumber(text):
 # =======================================
 # CHECK IF REGION IS IN A CELL OR A BLOCK
 # =======================================
-
 def inCellsOrBlocks(region,cells,inputBlocks):
 	#Check if either the top-left or bottom-right corners of
 	#the given region is the corner of an already existing cell
@@ -98,7 +95,6 @@ def inCellsOrBlocks(region,cells,inputBlocks):
 # =======================================
 # FIND THE NEXT COLLISION FUNCTION
 # =======================================
-
 def findCollision(point, inputBlocks):
 	#Set our next position out of bounds so we guarantee that we either
 	#collide with a box or are at the end
@@ -201,22 +197,36 @@ def drawBlocks(canvas, n):
 	y2 = inputBlocks[2][3]
 	rect3 = canvas.create_rectangle(x1, y1, x2+1, y2+1, fill='#fff')
 
+def drawPoints(canvas, n):
+	x1 = startPoint[0][0]
+	y1 = startPoint[0][1]
+	firstPoint = canvas.create_rectangle(x1, y1 , x1+10, y1+10, fill="blue")
+	canvas.tag_raise(firstPoint)
+	canvas.tag_raise(firstPoint)
 
 
+	x2 = endPoint[0][0]
+	y2 = endPoint[0][1]
+	secondPoint = canvas.create_rectangle(x2, y2 , x2+10, y2+10, fill="red")
+	canvas.tag_raise(secondPoint)
+	canvas.tag_raise(secondPoint)
 
 
 # =======================================
 # Run Point Robot Simulator
 # =======================================
-
 inputBlocks = inputFile("./inputs/Blocks/")
 print inputBlocks
 print makeBlocks(inputBlocks)
 
+startPoint = inputFile("./inputs/Start/")
+print startPoint
+
+endPoint = inputFile("./inputs/End/")
+print endPoint
+
 master = Tk()
 
 app = App(master)
-#w = Canvas(master, width=500, height=500)
-#w.pack()
 
 master.mainloop()
