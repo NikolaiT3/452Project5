@@ -1,5 +1,4 @@
 from Tkinter import *
-#import Tkinter as tk
 from math import *
 import graph
 import thread
@@ -25,13 +24,13 @@ class App:
 
         self.start = Button(w, text="Start", command=self.run)
         self.start.grid(row=0, column=1)
-        
-        thread.start_new_thread(drawBlocks, (w,1))
 
         thread.start_new_thread(drawPoints, (w, 1))
+        thread.start_new_thread(drawBlocks, (w, 2))
+        thread.start_new_thread(seeBlocks, (w, 3))
 
     def run(self):
-        print "Running simulation!"
+        runBot()
 
 # ===============================
 # IMPORT FILE FUNCTION
@@ -178,6 +177,9 @@ def makeBlocks(inputBlocks):
 			currentY = nextY
 	return cells
 
+# =======================================
+# Draw Blocks, start points, and free space
+# =======================================
 def drawBlocks(canvas, n):
   	x1 = inputBlocks[0][0]
 	y1 = inputBlocks[0][1]
@@ -211,13 +213,23 @@ def drawPoints(canvas, n):
 	canvas.tag_raise(secondPoint)
 	canvas.tag_raise(secondPoint)
 
+def seeBlocks(canvas, n):
+	for block in splitBlocks:
+		canvas.create_rectangle(block[1][0], block[1][1] , (block[1][2])+1, (block[1][3])+1, fill="yellow")
+
+# =======================================
+# RUN THE ROBOT
+# =======================================
+def runBot():
+	print "Succesful Function Call"
 
 # =======================================
 # Run Point Robot Simulator
 # =======================================
 inputBlocks = inputFile("./inputs/Blocks/")
 print inputBlocks
-print makeBlocks(inputBlocks)
+splitBlocks = makeBlocks(inputBlocks)
+print splitBlocks
 
 startPoint = inputFile("./inputs/Start/")
 print startPoint
