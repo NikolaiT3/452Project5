@@ -6,9 +6,65 @@ import random
 import time
 import glob
 import re
+import pprint
+
+from collections import defaultdict
 
 fieldWidth = 500
 fieldHeight = 500
+
+class Graph(object):
+    # Graph data structure, undirected by default.
+    # http://stackoverflow.com/questions/19472530/representing-graphs-data-structure-in-python
+    
+    def __init__(self, connections, directed=False):
+        self._graph = defaultdict(set)
+        self._directed = directed
+        self.add_connections(connections)
+
+    def add_connections(self, connections):
+        #Add connections (list of tuple pairs) to graph
+        for node1, node2 in connections:
+            self.add(node1, node2)
+
+    def add(self, node1, node2):
+        #Add connection between node1 and node2
+        self._graph[node1].add(node2)
+        if not self._directed:
+            self._graph[node2].add(node1)
+
+    def remove(self, node):
+        #Remove all references to node
+        for n, cxns in self._graph.iteritems():
+            try:
+                cxns.remove(node)
+            except KeyError:
+                pass
+        try:
+            del self._graph[node]
+        except KeyError:
+            pass
+
+    def is_connected(self, node1, node2):
+        #Is node1 directly connected to node2
+        return node1 in self._graph and node2 in self._graph[node1]
+
+    def find_path(self, node1, node2, path=[]):
+        #Find any path between node1 and node2 (may not be shortest)
+        path = path + [node1]
+        if node1 == node2:
+            return path
+        if node1 not in self._graph:
+            return None
+        for node in self._graph[node1]:
+            if node not in path:
+                new_path = self.find_path(node, node2, path)
+                if new_path:
+                    return new_path
+        return None
+
+    def __str__(self):
+        return '{}({})'.format(self.__class__.__name__, dict(self._graph))
 
 class App:
     def __init__(self, master):
@@ -27,7 +83,7 @@ class App:
 
         thread.start_new_thread(drawPoints, (w, 1))
         thread.start_new_thread(drawBlocks, (w, 2))
-        thread.start_new_thread(seeBlocks, (w, 3))
+        # thread.start_new_thread(seeBlocks, (w, 3))
 
     def run(self):
         runBot()
@@ -36,9 +92,9 @@ class App:
 # IMPORT FILE FUNCTION
 # ===============================
 def inputFile(path):
-  print path
+  # print path
   filenames = glob.glob(path+"*.txt")
-  print filenames
+  # print filenames
   text =[]
   for file in filenames:
       text += open(file,'r')
@@ -145,6 +201,7 @@ def makeBlocks(inputBlocks):
 	currentX = 0
 	currentY = 0
 	cells = []
+	index = 0
 
 	#Function is finished when we hit the bottom-right (top-right?) of the field
 	while currentY < fieldHeight:
@@ -157,6 +214,7 @@ def makeBlocks(inputBlocks):
 		nextY = points[3]
 
 		if not inCellsOrBlocks(points,cells,inputBlocks):
+			points.append(index)
 			cells.append(points)
 
 		#Move our x point forward
@@ -175,6 +233,10 @@ def makeBlocks(inputBlocks):
 					nextY = block[3]
 			currentX = 0
 			currentY = nextY
+			index = index - 1
+
+		index = index + 1
+
 	return cells
 
 # =======================================
@@ -206,7 +268,6 @@ def drawPoints(canvas, n):
 	canvas.tag_raise(firstPoint)
 	canvas.tag_raise(firstPoint)
 
-
 	x2 = endPoint[0][0]
 	y2 = endPoint[0][1]
 	secondPoint = canvas.create_rectangle(x2, y2 , x2+10, y2+10, fill="red")
@@ -215,7 +276,37 @@ def drawPoints(canvas, n):
 
 def seeBlocks(canvas, n):
 	for block in splitBlocks:
-		canvas.create_rectangle(block[1][0], block[1][1] , (block[1][2])+1, (block[1][3])+1, fill="yellow")
+		# print block
+		canvas.create_rectangle(block[0], block[1] , block[2], block[3], fill="yellow")
+
+# =======================================
+# STORE BLOCKS INTO GRAPH
+# =======================================
+def storeVerticalBlocks(splitBlocks):
+	size = len(splitBlocks)
+	c = []
+	connections = []
+	index = 0
+	for block in splitBlocks:
+		for i in range (0, size):
+			if i != index:
+				# increment i and store it in c
+				c.append(i)
+		connections.append(c)
+		index = index + 1
+		c = []
+	g = convertToTuples(connections, size)
+	return g
+
+def convertToTuples(connections, size):
+	c = []
+	conSize = len(connections[0])
+	for j in range (0, size):
+		for k in range (0, conSize):
+			tup = (j, connections[j][k])
+			c.append(tup)
+	g = Graph(c)
+	return g
 
 # =======================================
 # RUN THE ROBOT
@@ -230,12 +321,17 @@ inputBlocks = inputFile("./inputs/Blocks/")
 print inputBlocks
 splitBlocks = makeBlocks(inputBlocks)
 print splitBlocks
+g = storeVerticalBlocks(splitBlocks)
+# pprint(g._graph)
+print g
+
+print g.find_path(0, 5)
 
 startPoint = inputFile("./inputs/Start/")
-print startPoint
+# print startPoint
 
 endPoint = inputFile("./inputs/End/")
-print endPoint
+# print endPoint
 
 master = Tk()
 
