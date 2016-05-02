@@ -1,11 +1,10 @@
 from Tkinter import *
 from math import *
-import graph
+import re
 import thread
 import random
 import time
 import glob
-import re
 import pprint
 
 from collections import defaultdict
@@ -75,15 +74,18 @@ class App:
         # prevents window from shrinking to fit buttons
         w.grid_propagate(0)
 
-        self.quit = Button(w, text="QUIT", fg="red", command=w.quit)
+        self.quit = Button(
+            w, text="QUIT", fg="red", command=w.quit
+            )
         self.quit.grid(row=0, column=0)
 
+        thread.start_new_thread(drawCells, (w,1))
         self.start = Button(w, text="Start", command=self.run)
         self.start.grid(row=0, column=1)
 
         thread.start_new_thread(drawPoints, (w, 1))
         thread.start_new_thread(drawBlocks, (w, 2))
-        # thread.start_new_thread(seeBlocks, (w, 3))
+        #thread.start_new_thread(seeBlocks, (w, 3))
 
     def run(self):
         runBot()
@@ -132,21 +134,21 @@ def input_toNumber(text):
 # CHECK IF REGION IS IN A CELL OR A BLOCK
 # =======================================
 def inCellsOrBlocks(region,cells,inputBlocks):
-	#Check if either the top-left or bottom-right corners of
+	#Check if either the top-left or bottom-right corners of 
 	#the given region is the corner of an already existing cell
 	for cell in cells:
 		if(region[0] == cell[0] and region[1] == cell[1]) or (region[2] == cell[2] and region[3] == cell[3]):
 			return True
-
+	
 	#Check if either the top-left or bottom-right corners of
 	#the given region is inside one of the obstacle blocks
 	for block in inputBlocks:
 			if((region[0] > block[0] and region[0] < block[2] or region[2] > block[0] and region[2] < block[2])
 				and (region[1] > block[1] and region[1] < block[3] or region[3] > block[1] and region[3] < block[3])):
 					return True
-
+	
 	return False
-
+	
 # =======================================
 # FIND THE NEXT COLLISION FUNCTION
 # =======================================
@@ -156,8 +158,8 @@ def findCollision(point, inputBlocks):
 	currentX = point[0]
 	currentY = point[1]
 	nextX = fieldWidth+1
-	nextY = fieldHeight
-
+	nextY = fieldHeight	
+		
 	#We imagine that the vertical edges of the blocks extend infinitely,
 	#and check for the next collision with an edge
 	for block in inputBlocks:
@@ -165,21 +167,21 @@ def findCollision(point, inputBlocks):
 		leftY = block[1]
 		rightX = block[2]
 		rightY = block[3]
-
+		
 		#If we hit the left edge, we automatically extend the cell downwards
 		#If we hit the right edge, we need to check which way to extend
 		if leftX < nextX and leftX > currentX:
-			nextX = leftX
+			nextX = leftX	
 		if rightX < nextX and rightX > currentX:
 			nextX = rightX
-
+			
 			#If we are on top of the block, we need to extend the cell upwards
 			#else we extend downwards
 			if leftY < nextY and leftY > currentY:
 				nextY = leftY
 			if rightY < nextY and rightY > currentY:
 				nextY = rightY
-
+	
 	#If we're at the bottom of a block, we check for other collisions
 	#below (above?) the block, otherwise we extend the cell to the bottom (top?)
 	for block in inputBlocks:
@@ -188,15 +190,15 @@ def findCollision(point, inputBlocks):
 		rightX = block[2]
 		rightY = block[3]
 
-		if leftX < nextX and rightX > nextX:
+		if leftX < nextX and rightX > nextX and currentY > nextY:
 			nextY = leftY
 	points = [currentX, currentY, nextX, nextY]
 	return points
-
+	
 def makeBlocks(inputBlocks):
-	#Blocks are made by scanning the field in row-major order
+	#Blocks are made by scanning the field in row-major order 
 	#(go across horizontally, step down (up? idk how Python does it), go across again, etc.)
-
+	
 	#Initialize current position and empty list of cells
 	currentX = 0
 	currentY = 0
@@ -205,7 +207,7 @@ def makeBlocks(inputBlocks):
 
 	#Function is finished when we hit the bottom-right (top-right?) of the field
 	while currentY < fieldHeight:
-
+		
 		#Find the next collision with a block and retrieve the needed points
 		points = findCollision([currentX,currentY],inputBlocks)
 		currentX = points[0]
@@ -216,10 +218,10 @@ def makeBlocks(inputBlocks):
 		if not inCellsOrBlocks(points,cells,inputBlocks):
 			points.append(index)
 			cells.append(points)
-
+		
 		#Move our x point forward
 		currentX = nextX
-
+		
 		#When we hit the right edge of the screen, we need to move our y
 		#position to the next lowest (highest?) block edge
 		if(currentX >= (fieldHeight-1)):
@@ -243,24 +245,32 @@ def makeBlocks(inputBlocks):
 # Draw Blocks, start points, and free space
 # =======================================
 def drawBlocks(canvas, n):
-  	x1 = inputBlocks[0][0]
-	y1 = inputBlocks[0][1]
-	x2 = inputBlocks[0][2]
-	y2 = inputBlocks[0][3]
-	rect1 = canvas.create_rectangle(x1, y1, x2+1, y2+1, fill='#fff')
+    x1 = inputBlocks[0][0]
+    y1 = inputBlocks[0][1]
+    x2 = inputBlocks[0][2]
+    y2 = inputBlocks[0][3]
+    rect1 = canvas.create_rectangle(x1, y1, x2+1, y2+1, fill='#fff')
 
-  	x1 = inputBlocks[1][0]
-	y1 = inputBlocks[1][1]
-	x2 = inputBlocks[1][2]
-	y2 = inputBlocks[1][3]
-	rect2 = canvas.create_rectangle(x1, y1, x2+1, y2+1, fill='#fff')
+    x1 = inputBlocks[1][0]
+    y1 = inputBlocks[1][1]
+    x2 = inputBlocks[1][2]
+    y2 = inputBlocks[1][3]
+    rect2 = canvas.create_rectangle(x1, y1, x2+1, y2+1, fill='#fff')
 
-	x1 = inputBlocks[2][0]
-	y1 = inputBlocks[2][1]
-	x2 = inputBlocks[2][2]
-	y2 = inputBlocks[2][3]
-	rect3 = canvas.create_rectangle(x1, y1, x2+1, y2+1, fill='#fff')
+    x1 = inputBlocks[2][0]
+    y1 = inputBlocks[2][1]
+    x2 = inputBlocks[2][2]
+    y2 = inputBlocks[2][3]
+    rect2 = canvas.create_rectangle(x1, y1, x2+1, y2+1, fill='#fff')
 
+def drawCells(canvas, n):
+    for cell in t_cells:
+        x1 = cell[0]
+        y1 = cell[1]
+        x2 = cell[2]
+        y2 = cell[3]
+        trect = canvas.create_rectangle(x1, y1, x2+1, y2+1, fill='blue')
+        t_cell_gfx.append(trect)
 def drawPoints(canvas, n):
 	x1 = startPoint[0][0]
 	y1 = startPoint[0][1]
@@ -319,8 +329,11 @@ def runBot():
 # =======================================
 inputBlocks = inputFile("./inputs/Blocks/")
 print inputBlocks
+t_cells = makeBlocks(inputBlocks)
+t_cell_gfx = []
 splitBlocks = makeBlocks(inputBlocks)
 print splitBlocks
+print t_cells
 g = storeVerticalBlocks(splitBlocks)
 # pprint(g._graph)
 print g
