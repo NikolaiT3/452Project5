@@ -1,13 +1,69 @@
-﻿from Tkinter import *
+from Tkinter import *
 from math import *
 import re
 import thread
 import random
 import time
 import glob
+import pprint
+
+from collections import defaultdict
 
 fieldWidth = 500
 fieldHeight = 500
+
+class Graph(object):
+    # Graph data structure, undirected by default.
+    # http://stackoverflow.com/questions/19472530/representing-graphs-data-structure-in-python
+    
+    def __init__(self, connections, directed=False):
+        self._graph = defaultdict(set)
+        self._directed = directed
+        self.add_connections(connections)
+
+    def add_connections(self, connections):
+        #Add connections (list of tuple pairs) to graph
+        for node1, node2 in connections:
+            self.add(node1, node2)
+
+    def add(self, node1, node2):
+        #Add connection between node1 and node2
+        self._graph[node1].add(node2)
+        if not self._directed:
+            self._graph[node2].add(node1)
+
+    def remove(self, node):
+        #Remove all references to node
+        for n, cxns in self._graph.iteritems():
+            try:
+                cxns.remove(node)
+            except KeyError:
+                pass
+        try:
+            del self._graph[node]
+        except KeyError:
+            pass
+
+    def is_connected(self, node1, node2):
+        #Is node1 directly connected to node2
+        return node1 in self._graph and node2 in self._graph[node1]
+
+    def find_path(self, node1, node2, path=[]):
+        #Find any path between node1 and node2 (may not be shortest)
+        path = path + [node1]
+        if node1 == node2:
+            return path
+        if node1 not in self._graph:
+            return None
+        for node in self._graph[node1]:
+            if node not in path:
+                new_path = self.find_path(node, node2, path)
+                if new_path:
+                    return new_path
+        return None
+
+    def __str__(self):
+        return '{}({})'.format(self.__class__.__name__, dict(self._graph))
 
 class App:
     def __init__(self, master):
@@ -16,34 +72,31 @@ class App:
         w.pack()
 
         # prevents window from shrinking to fit buttons
-        # w.pack_propagate(0)
+        w.grid_propagate(0)
 
         self.quit = Button(
             w, text="QUIT", fg="red", command=w.quit
             )
         self.quit.grid(row=0, column=0)
-        #self.quit.pack(side=BOTTOM)
 
-        thread.start_new_thread(drawBlocks, (w,1))
         thread.start_new_thread(drawCells, (w,1))
-
         self.start = Button(w, text="Start", command=self.run)
         self.start.grid(row=0, column=1)
-        #self.start.pack(side=TOP)
 
-        # prevents window from shrinking to fit buttons
-        w.grid_propagate(0)
+        thread.start_new_thread(drawPoints, (w, 1))
+        thread.start_new_thread(drawBlocks, (w, 2))
+        # thread.start_new_thread(seeBlocks, (w, 3))
 
     def run(self):
-        print "Running simulation"
+        runBot()
 
 # ===============================
 # IMPORT FILE FUNCTION
 # ===============================
 def inputFile(path):
-  print path
+  # print path
   filenames = glob.glob(path+"*.txt")
-  print filenames
+  # print filenames
   text =[]
   for file in filenames:
       text += open(file,'r')
@@ -56,13 +109,13 @@ def sanitize_input(text):
   sanitized_text = []
   for word in text:
 
-#       Get rid of punctuation, convert to lower, remove new line characters
-#       text = text.translate(None, string.punctuation).lower()
+		# Get rid of punctuation, convert to lower, remove new line characters
+		# text = text.translate(None, string.punctuation).lower()
 
       sanitize = re.sub("[^\w']|_", " ", word.lower())
       words = list(sanitize.split())
 
-#       List of lists to keep books structure
+		# List of lists to keep books structure
       sanitized_text.append(words)
       sanitized_text = input_toNumber(sanitized_text)
   return sanitized_text
@@ -80,7 +133,6 @@ def input_toNumber(text):
 # =======================================
 # CHECK IF REGION IS IN A CELL OR A BLOCK
 # =======================================
-
 def inCellsOrBlocks(region,cells,inputBlocks):
 	#Check if either the top-left or bottom-right corners of 
 	#the given region is the corner of an already existing cell
@@ -100,7 +152,6 @@ def inCellsOrBlocks(region,cells,inputBlocks):
 # =======================================
 # FIND THE NEXT COLLISION FUNCTION
 # =======================================
-	
 def findCollision(point, inputBlocks):
 	#Set our next position out of bounds so we guarantee that we either
 	#collide with a box or are at the end
@@ -152,7 +203,8 @@ def makeBlocks(inputBlocks):
 	currentX = 0
 	currentY = 0
 	cells = []
-	
+	index = 0
+
 	#Function is finished when we hit the bottom-right (top-right?) of the field
 	while currentY < fieldHeight:
 		
@@ -164,6 +216,7 @@ def makeBlocks(inputBlocks):
 		nextY = points[3]
 
 		if not inCellsOrBlocks(points,cells,inputBlocks):
+			points.append(index)
 			cells.append(points)
 		
 		#Move our x point forward
@@ -182,9 +235,15 @@ def makeBlocks(inputBlocks):
 					nextY = block[3]
 			currentX = 0
 			currentY = nextY
+			index = index - 1
+
+		index = index + 1
+
 	return cells
 
-
+# =======================================
+# Draw Blocks, start points, and free space
+# =======================================
 def drawBlocks(canvas, n):
     x1 = inputBlocks[0][0]
     y1 = inputBlocks[0][1]
@@ -212,24 +271,83 @@ def drawCells(canvas, n):
         y2 = cell[3]
         trect = canvas.create_rectangle(x1, y1, x2+1, y2+1, fill='blue')
         t_cell_gfx.append(trect)
+def drawPoints(canvas, n):
+	x1 = startPoint[0][0]
+	y1 = startPoint[0][1]
+	firstPoint = canvas.create_rectangle(x1, y1 , x1+10, y1+10, fill="blue")
+	canvas.tag_raise(firstPoint)
+	canvas.tag_raise(firstPoint)
 
+	x2 = endPoint[0][0]
+	y2 = endPoint[0][1]
+	secondPoint = canvas.create_rectangle(x2, y2 , x2+10, y2+10, fill="red")
+	canvas.tag_raise(secondPoint)
+	canvas.tag_raise(secondPoint)
 
+def seeBlocks(canvas, n):
+	for block in splitBlocks:
+		# print block
+		canvas.create_rectangle(block[0], block[1] , block[2], block[3], fill="yellow")
+
+# =======================================
+# STORE BLOCKS INTO GRAPH
+# =======================================
+def storeVerticalBlocks(splitBlocks):
+	size = len(splitBlocks)
+	c = []
+	connections = []
+	index = 0
+	for block in splitBlocks:
+		for i in range (0, size):
+			if i != index:
+				# increment i and store it in c
+				c.append(i)
+		connections.append(c)
+		index = index + 1
+		c = []
+	g = convertToTuples(connections, size)
+	return g
+
+def convertToTuples(connections, size):
+	c = []
+	conSize = len(connections[0])
+	for j in range (0, size):
+		for k in range (0, conSize):
+			tup = (j, connections[j][k])
+			c.append(tup)
+	g = Graph(c)
+	return g
+
+# =======================================
+# RUN THE ROBOT
+# =======================================
+def runBot():
+	print "Succesful Function Call"
 
 # =======================================
 # Run Point Robot Simulator
 # =======================================
-
 inputBlocks = inputFile("./inputs/Blocks/")
 print inputBlocks
 t_cells = makeBlocks(inputBlocks)
 t_cell_gfx = []
+splitBlocks = makeBlocks(inputBlocks)
+print splitBlocks
 print t_cells
+g = storeVerticalBlocks(splitBlocks)
+# pprint(g._graph)
+print g
+
+print g.find_path(0, 5)
+
+startPoint = inputFile("./inputs/Start/")
+# print startPoint
+
+endPoint = inputFile("./inputs/End/")
+# print endPoint
 
 master = Tk()
 
 app = App(master)
-
-#w = Canvas(master, width=500, height=500)
-#w.pack()
 
 master.mainloop()
