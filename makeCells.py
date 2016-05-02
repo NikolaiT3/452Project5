@@ -277,10 +277,12 @@ def drawPoints(canvas, n):
 	firstPoint = canvas.create_rectangle(x1, y1 , x1+10, y1+10, fill="blue")
 	canvas.tag_raise(firstPoint)
 	canvas.tag_raise(firstPoint)
+	canvas.tag_raise(firstPoint)
 
 	x2 = endPoint[0][0]
 	y2 = endPoint[0][1]
 	secondPoint = canvas.create_rectangle(x2, y2 , x2+10, y2+10, fill="red")
+	canvas.tag_raise(secondPoint)
 	canvas.tag_raise(secondPoint)
 	canvas.tag_raise(secondPoint)
 
