@@ -240,6 +240,21 @@ def makeBlocks(inputBlocks):
 		index = index + 1
 
 	return cells
+# =======================================
+# POINT TO BLOCK ID
+# =======================================
+
+def pointToBlock(x, y, splitBlocks):
+	# print "X: " + str(x)
+	# print "Y: " + str(y)
+
+	size = len(splitBlocks)
+	# print "Size: " + str(size)
+
+	for block in splitBlocks:
+		if (x > block[0] and x < block[2] and y > block[1] and y < block[3]):
+			return block[4]
+
 
 # =======================================
 # Draw Blocks, start points, and free space
@@ -339,14 +354,16 @@ print splitBlocks
 print t_cells
 g = storeVerticalBlocks(splitBlocks)
 # pprint(g._graph)
-print g
-
-print g.find_path(0, 5)
-
 startPoint = inputFile("./inputs/Start/")
-# print startPoint
-
 endPoint = inputFile("./inputs/End/")
+
+start = pointToBlock(startPoint[0][0], startPoint[0][1], splitBlocks)
+end = pointToBlock(endPoint[0][0], endPoint[0][1], splitBlocks)
+
+print g
+print g.find_path(start, end)
+
+# print startPoint
 # print endPoint
 
 master = Tk()
