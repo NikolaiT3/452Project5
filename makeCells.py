@@ -6,6 +6,7 @@ import random
 import time
 import glob
 import pprint
+import math
 
 from collections import defaultdict
 
@@ -79,7 +80,6 @@ class App:
             )
         self.quit.grid(row=0, column=0)
 
-        # thread.start_new_thread(drawCells, (w,1))
         self.start = Button(w, text="Start", command=self.run)
         self.start.grid(row=0, column=1)
 
@@ -278,14 +278,6 @@ def drawBlocks(canvas, n):
     y2 = inputBlocks[2][3]
     rect2 = canvas.create_rectangle(x1, y1, x2+1, y2+1, fill='#fff')
 
-def drawCells(canvas, n):
-    for cell in t_cells:
-        x1 = cell[0]
-        y1 = cell[1]
-        x2 = cell[2]
-        y2 = cell[3]
-        trect = canvas.create_rectangle(x1, y1, x2+1, y2+1, fill='blue')
-        t_cell_gfx.append(trect)
 def drawPoints(canvas, n):
 	x1 = startPoint[0][0]
 	y1 = startPoint[0][1]
@@ -343,17 +335,63 @@ def runBot():
 	print "Succesful Function Call"
 
 # =======================================
+# DRAW THE PATH
+# =======================================
+def drawPath(start, end, path):
+	# centerX = x1 - ( (x1-x0)/2 )
+	# centerY = y1 - ( (y1-y0)/2 )
+	center = [0.0, 0.0]
+	pathCenters = []
+	pathCorners = []
+	finalPath = []
+	for i in range (0, len(path)):
+		center[0] = splitBlocks[path[i]][2] - ( (splitBlocks[path[i]][2]-splitBlocks[path[i]][0])/2 )
+		center[1] = splitBlocks[path[i]][3] - ( (splitBlocks[path[i]][3]-splitBlocks[path[i]][1])/2 )
+		pathCenters.append(center)
+		center = [0.0, 0.0]
+
+	#find path corners
+	corners = [[0.0,0.0], [0.0,0.0], [0.0,0.0], [0.0,0.0]]	#[ x0, x1, x2, x3 ]
+	closest = []
+	for i in range(0,len(path)):
+		corners[0][0] = splitBlocks[path[i]][0]
+		corners[0][1] = splitBlocks[path[i]][1]
+		corners[2][0] = splitBlocks[path[i]][2]
+		corners[2][1] = splitBlocks[path[i]][3]
+		corners[1][0] = corners[2][0]	#x2			corners[2][0]
+		corners[1][1] = corners[0][1]	#y0			corners[0][1]
+		corners[3][0] = corners[0][0]	#x1			corners[2][0]
+		corners[3][1] = corners[2][1]	#y2			corners[2][1]
+		if i != len(path)-1:
+			for j in range(0,4):
+				tup = (j, math.hypot(pathCenters[i+1][0]-corners[j][0], pathCenters[i+1][1]-corners[j][1]))
+				closest.append(tup)
+			nextPoint = min(closest, key = lambda t: t[1])
+			pathCorners.append(corners[nextPoint[0]])
+			closest = []
+			corners = [[0.0,0.0], [0.0,0.0], [0.0,0.0], [0.0,0.0]]
+			nextPoint = 0.0
+	print pathCorners
+	finalPath.append(start[0])
+	for i in range(0,len(pathCenters)):
+		finalPath.append(pathCenters[i])
+		if i != len(pathCenters)-1:
+			print i
+			finalPath.append(pathCorners[i])
+	finalPath.append(end[0])
+	print finalPath
+	return finalPath
+	# this returns [[startPoint], [centerPoint], [cornerPoint],....,[endPoint]]
+	# http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/create_line.html
+	# id = canvas.create_line(x0, y0, x1, y1, x2, y2, ...)	WILL DRAW ONE LINE BETWEEN ALL POINTS - CONNECTS THE DOTS
+
+
+# =======================================
 # Run Point Robot Simulator
 # =======================================
 inputBlocks = inputFile("./inputs/Blocks/")
-print inputBlocks
-t_cells = makeBlocks(inputBlocks)
-t_cell_gfx = []
 splitBlocks = makeBlocks(inputBlocks)
-print splitBlocks
-print t_cells
 g = storeVerticalBlocks(splitBlocks)
-# pprint(g._graph)
 startPoint = inputFile("./inputs/Start/")
 endPoint = inputFile("./inputs/End/")
 
@@ -361,10 +399,8 @@ start = pointToBlock(startPoint[0][0], startPoint[0][1], splitBlocks)
 end = pointToBlock(endPoint[0][0], endPoint[0][1], splitBlocks)
 
 print g
-print g.find_path(start, end)
 
-# print startPoint
-# print endPoint
+drawPath( startPoint, endPoint, g.find_path(start, end) )
 
 master = Tk()
 
