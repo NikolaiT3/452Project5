@@ -79,13 +79,13 @@ class App:
             )
         self.quit.grid(row=0, column=0)
 
-        thread.start_new_thread(drawCells, (w,1))
+        # thread.start_new_thread(drawCells, (w,1))
         self.start = Button(w, text="Start", command=self.run)
         self.start.grid(row=0, column=1)
 
         thread.start_new_thread(drawPoints, (w, 1))
         thread.start_new_thread(drawBlocks, (w, 2))
-        #thread.start_new_thread(seeBlocks, (w, 3))
+        thread.start_new_thread(seeBlocks, (w, 3))
 
     def run(self):
         runBot()
@@ -275,21 +275,21 @@ def drawPoints(canvas, n):
 	x1 = startPoint[0][0]
 	y1 = startPoint[0][1]
 	firstPoint = canvas.create_rectangle(x1, y1 , x1+10, y1+10, fill="blue")
-	canvas.tag_raise(firstPoint)
-	canvas.tag_raise(firstPoint)
-	canvas.tag_raise(firstPoint)
+	raiseTags(canvas, firstPoint)
 
 	x2 = endPoint[0][0]
 	y2 = endPoint[0][1]
 	secondPoint = canvas.create_rectangle(x2, y2 , x2+10, y2+10, fill="red")
-	canvas.tag_raise(secondPoint)
-	canvas.tag_raise(secondPoint)
-	canvas.tag_raise(secondPoint)
+	raiseTags(canvas, secondPoint)
 
 def seeBlocks(canvas, n):
 	for block in splitBlocks:
 		# print block
 		canvas.create_rectangle(block[0], block[1] , block[2], block[3], fill="yellow")
+
+def raiseTags(canvas, point):
+	for i in range (0,25):
+		canvas.tag_raise(point)
 
 # =======================================
 # STORE BLOCKS INTO GRAPH
