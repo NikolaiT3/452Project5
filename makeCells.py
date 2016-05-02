@@ -83,7 +83,7 @@ class App:
 
         thread.start_new_thread(drawPoints, (w, 1))
         thread.start_new_thread(drawBlocks, (w, 2))
-        # thread.start_new_thread(seeBlocks, (w, 3))
+        #thread.start_new_thread(seeBlocks, (w, 3))
 
     def run(self):
         runBot()
@@ -188,7 +188,7 @@ def findCollision(point, inputBlocks):
 		rightX = block[2]
 		rightY = block[3]
 
-		if leftX < nextX and rightX > nextX:
+		if leftX < nextX and rightX > nextX and leftY < nextY:
 			nextY = leftY
 	points = [currentX, currentY, nextX, nextY]
 	return points
