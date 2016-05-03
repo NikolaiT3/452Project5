@@ -1,4 +1,4 @@
-from Tkinter import *
+﻿from Tkinter import *
 from math import *
 import re
 import thread
@@ -67,7 +67,7 @@ class Graph(object):
         return '{}({})'.format(self.__class__.__name__, dict(self._graph))
 
 class App:
-    def __init__(self, master):
+    def __init__(self, master, id):
 
         w = Canvas(master, width=500, height=500)
         w.pack()
@@ -86,6 +86,9 @@ class App:
         thread.start_new_thread(drawPoints, (w, 1))
         thread.start_new_thread(drawBlocks, (w, 2))
         thread.start_new_thread(seeBlocks, (w, 3))
+
+        time.sleep(5)
+        fp = w.create_line(id)
 
     def run(self):
         runBot()
@@ -380,6 +383,7 @@ def drawPath(start, end, path):
 			finalPath.append(pathCorners[i])
 	finalPath.append(end[0])
 	print finalPath
+
 	return finalPath
 	# this returns [[startPoint], [centerPoint], [cornerPoint],....,[endPoint]]
 	# http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/create_line.html
@@ -400,10 +404,12 @@ end = pointToBlock(endPoint[0][0], endPoint[0][1], splitBlocks)
 
 print g
 
-drawPath( startPoint, endPoint, g.find_path(start, end) )
+id = drawPath( startPoint, endPoint, g.find_path(start, end) )
 
+print '\n'+str(id)
 master = Tk()
 
-app = App(master)
+app = App(master, id)
+
 
 master.mainloop()
