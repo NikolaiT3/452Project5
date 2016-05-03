@@ -90,7 +90,7 @@ class App:
     def draw_line(self,id):
 
         drawBlocks(self.w, 2)
-        seeBlocks(self.w, 3)
+        # seeBlocks(self.w, 3)
         drawPoints(self.w, 1)
         self.w.create_line(id)
 
@@ -225,6 +225,7 @@ def makeBlocks(inputBlocks):
 		if not inCellsOrBlocks(points,cells,inputBlocks):
 			points.append(index)
 			cells.append(points)
+			index = index + 1
 
 		#Move our x point forward
 		currentX = nextX
@@ -242,9 +243,6 @@ def makeBlocks(inputBlocks):
 					nextY = block[3]
 			currentX = 0
 			currentY = nextY
-			index = index - 1
-
-		index = index + 1
 
 	return cells
 # =======================================
@@ -253,10 +251,10 @@ def makeBlocks(inputBlocks):
 
 def pointToBlock(x, y, splitBlocks):
 	size = len(splitBlocks)
-	# print "Size: " + str(size)
+	print "Size: " + str(size)
 
 	for block in splitBlocks:
-		if (x > block[0] and x < block[2] and y > block[1] and y < block[3]):
+		if (x > block[0] and x < block[2] ) and ( y > block[1] and y < block[3]):
 			return block[4]
 
 
@@ -408,12 +406,16 @@ g = storeVerticalBlocks(splitBlocks)
 startPoint = inputFile("./inputs/Start/")
 endPoint = inputFile("./inputs/End/")
 
+print splitBlocks
 start = pointToBlock(startPoint[0][0], startPoint[0][1], splitBlocks)
 end = pointToBlock(endPoint[0][0], endPoint[0][1], splitBlocks)
 
 print g
+print start
+print end
 print "PATH HERE: " + str(g.find_path(start, end))
 
+print(g.find_path(start, end))
 id = drawPath( startPoint, endPoint, g.find_path(start, end) )
 
 print '\n'+str(id)
