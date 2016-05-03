@@ -67,28 +67,32 @@ class Graph(object):
         return '{}({})'.format(self.__class__.__name__, dict(self._graph))
 
 class App:
-    def __init__(self, master, id):
+    def __init__(self, master):
 
-        w = Canvas(master, width=500, height=500)
-        w.pack()
+        self.w = Canvas(master, width=500, height=500)
+        self.w.pack()
 
         # prevents window from shrinking to fit buttons
-        w.grid_propagate(0)
+        self.w.grid_propagate(0)
 
         self.quit = Button(
-            w, text="QUIT", fg="red", command=w.quit
+            self.w, text="QUIT", fg="red", command=self.w.quit
             )
         self.quit.grid(row=0, column=0)
 
-        self.start = Button(w, text="Start", command=self.run)
+        self.start = Button(self.w, text="Start", command=self.run)
         self.start.grid(row=0, column=1)
 
-        thread.start_new_thread(drawPoints, (w, 1))
-        thread.start_new_thread(drawBlocks, (w, 2))
-        thread.start_new_thread(seeBlocks, (w, 3))
+        #thread.start_new_thread(drawPoints, (self.w, 1))
+        #thread.start_new_thread(drawBlocks, (self.w, 2))
+        #thread.start_new_thread(seeBlocks, (self.w, 3))
 
-        time.sleep(5)
-        fp = w.create_line(id)
+    def draw_line(self,id):
+        
+        drawBlocks(self.w, 2)
+        seeBlocks(self.w, 3)
+        drawPoints(self.w, 1)
+        self.w.create_line(id)
 
     def run(self):
         runBot()
@@ -409,7 +413,7 @@ id = drawPath( startPoint, endPoint, g.find_path(start, end) )
 print '\n'+str(id)
 master = Tk()
 
-app = App(master, id)
-
+app = App(master)
+app.draw_line(id)
 
 master.mainloop()
