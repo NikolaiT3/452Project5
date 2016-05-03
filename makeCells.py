@@ -88,7 +88,7 @@ class App:
         #thread.start_new_thread(seeBlocks, (self.w, 3))
 
     def draw_line(self,id):
-        
+
         drawBlocks(self.w, 2)
         seeBlocks(self.w, 3)
         drawPoints(self.w, 1)
@@ -252,9 +252,6 @@ def makeBlocks(inputBlocks):
 # =======================================
 
 def pointToBlock(x, y, splitBlocks):
-	# print "X: " + str(x)
-	# print "Y: " + str(y)
-
 	size = len(splitBlocks)
 	# print "Size: " + str(size)
 
@@ -315,10 +312,18 @@ def storeVerticalBlocks(splitBlocks):
 	index = 0
 	for block in splitBlocks:
 		for i in range (0, size):
-			# block[2] == top left x coor
-			# splitBlocks[i][0] == top right of next block
-			if block[2] == splitBlocks[i][0]:
+			# block[2] == top right x coor
+			# splitBlocks[i][0] == top left of next block
+			print "BLOCK2 HERE: " + str(block[2])
+			print "BLOCK " + str(i) + " HERE: " + str(splitBlocks[i][0])
+			print "BLOCK FULL: " + str(block)
+			print "NEXT BLOCK FULL: " + str(splitBlocks[i])
+			if block[2] == splitBlocks[i][0] and block[1] <= splitBlocks[i][4]:
 				c.append(i)
+				print "SUCCESS"
+				print "CURRENT GRAPH: " + str(c)
+			print "========"
+		print "**************************"
 		connections.append(c)
 		index = index + 1
 		c = []
@@ -407,6 +412,7 @@ start = pointToBlock(startPoint[0][0], startPoint[0][1], splitBlocks)
 end = pointToBlock(endPoint[0][0], endPoint[0][1], splitBlocks)
 
 print g
+print "PATH HERE: " + str(g.find_path(start, end))
 
 id = drawPath( startPoint, endPoint, g.find_path(start, end) )
 
